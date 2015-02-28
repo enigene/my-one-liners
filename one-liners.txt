@@ -1,0 +1,114 @@
+gawk "/^>/{if($0~/M1,Oa/){header=$0;print}}!/[^ACGTN]/{if(header){print;header=\"\"}}" human-WGS-all_classes.fa > human-WGS-Oa.fa
+
+gawk "/^>/{if(($0~/16[89]/)||($0~/17[012]/)){header=$0;print}}!/[^ACGTN]/{if(header){print;header=\"\"}}" human-WGS-NaOa.fas > human-WGS-NaOa1.fas
+
+gawk "!/[^ACGT-]/{gsub(/-/,\"\",$0)}{print}" human-WGS-Ba-200.fas > human-WGS-Ba-200a.fas
+
+# Multiline FASTA to Oneline
+gawk "BEGIN{ORS=\"\"}/^>/{print \"\n\";print;print \"\n\"}!/[^ACGTN-]/{print}" human-ASM_all_classes.fas > human-ASM_all_classes.fas1
+
+# Trim after blank in fasta header
+sed "/^>/s/ .*//" input.fas > output.fas
+
+# Delete string between || and trim after blank in fasta header
+sed "/^>/s/| .*//" | sed "/^>/s/\([a-z0-9]\+|\)\{3\}//"
+
+# Correct coordinates
+gawk "BEGIN{OFS=\"\t\";val=2649520}/^chrY/{$2+=val;$3+=val;$7+=val;$8+=val}{print}" human-all_classes-v1.1t.bed > human-all_classes-v1.1t.bed1
+
+# Add something to the end of sequence title
+gawk "/^>/{print $0 \"\174\" \"S3\";next}{print}"
+
+# \174 = |
+# \76 = >
+
+# FASTQ to FASTA
+gawk "/^@gnl/{header=$0;sub(/@/,\"\76\");print}!/[^ATGCN]/{if(header){print;header=\"\"}}" fastq > fas
+
+# FASTQ to FASTA v1.1
+gawk "NR==1{id=substr($0,1,4)}$0~\"^\"id){h=$0;sub(/@/,\"\76\");print}!/[^ACGTN]/{if(h){print;h=\"\"}}" fastq > fas
+
+# Cut FASTA/FASTQ
+gawk "{if($0~/^@gnl|^\+$/){header=$0;print}else{if(header){$0=substr($0,1,76);print;header=\"\"}}}" fastq > cut_fastq
+
+# Get AS (summa2) and time
+gawk "/summa2=/{printf(\"%s %d\",FILENAME,$2)}/calculation time=/{printf(\" %d\n\",$4)}" prcn > out
+
+# Calc AI SF1: (summa ? number) / (summa summarum)
+gawk "/? number=/{sqn=$3}/summa summarum=/{ss=$3;printf(\"%s %.2f\n\",FILENAME,sqn/ss);nextfile}" prcn > out
+# Calc AI SF1: (summa ? number) / (summa summarum) (linux/cygwin version)
+gawk '/? number=/{sqn=$3}/summa summarum=/{ss=$3;printf("%s %.2f\n",FILENAME,sqn/ss);nextfile}' $(ls *.prcn|xargs)
+
+# Extract seq from zipped FastQ
+find . -type f -name "*.fastq.gz" exec sh -c 'zless {} | gawk "BEGIN{s=2500000;r=500000;e=s+r}/@SRR/{n++}n==s{p=1}n==e{exit}p{print}" > $(basename {} .fastq.gz)-5.fastq' \;
+
+# Slice long sequence into pieces
+gawk "BEGIN{FS=\"\";n=1}/>/{h=$0;print h \"_\" n}!/[^ACGTN]/{for(i=1;i<=NF;i++){printf(\"%s\",$i);j++;if(j%100==0){print \"\n\" h \"_\" ++n;j=0}}}" input.fas > out-by100bp.fas
+
+# Sort sequences by coordinate
+sed "$!N;s/d/ d/;s/_/_ /;s/\n/ $/" XPA1D.fas | sort -n -k 2 | sed "s/ //g;s/\$/\n/" > XPA1D-s.fas
+
+# Sort bed (w/o header)
+sort -k 1.4,1V -k 2,2n input.bed > output.bed
+
+# UNIX -> DOS (winxp)
+sed.exe -e "s/\r/\n/" input.gb > output.gb
+# UNIX -> DOS (win7, linux)
+sed.exe -e "s/$/\r/" input.gb > output.gb
+
+# miip xls to fasta
+gawk "/^[0-9]+/{print \"\76\"$2\"\174\"$3\"_\"$4\"\n\"toupper($6)}" out-miip.xls > seq.fas
+
+# Convert *my* GenBank to FASTA
+gawk "/LOCUS/{print $2}!/[^ACGTN[:blank:]]/{sub(/^[[:blank:]]+/,\"\",$0);print}" input.gb > output.fas
+
+# Convert FASTA files to GenBank
+find -type f -name "*.fas" -exec sh -c "/cygdrive/c/personal/my/ivanalex/fasta2gb/fas2gb.exe {} > $(dirname {})/$(basename {} .fas).gb" ;
+# Convert FASTA files to GenBank (v2)
+find . -type f -name "*.fas" -exec sh -c '/cygdrive/c/personal/my/ivanalex/fasta2gb/fas2gb.exe {} > $(basename {} .fas).gb' \;
+
+
+# Print FASTA files (with one seq in each) to online
+find -type f -name "*.fas" -exec sh -c "gawk 'NR==1{print}NR>1{ORS=\"\";print}' {} > $(dirname {})/$(basename {} .fas)-oneline.fas" ;
+
+# Make BAT for Percon
+find -type f -name "*.gb" -printf "c:\\deep720\\perconTask.exe -db %h\\%f -rs 0.20 -fasMon 1\n" > percon.bat
+
+# Extract seq from Percon output
+find -type f -name "*.prcn" -exec sh -c "gawk -f 'c:\personal\my\ivanalex\Get-Seq-by-Class\extr-sep-seq-v1.1.1.awk' {} > $(dirname {})/$(basename {}).fas" ;
+
+# Count seq in some files
+find -type f -name "*-aln*.fas" -exec sh -c "gawk '/^>/{n++}END{print FILENAME,n}' {}" ;
+
+# Print accesion by interval
+gawk "BEGIN{s=\"JQ685\";n=186;m=223;for(i=n;i<=m;i++){if(i>n)printf(\",\");printf(\"%s%d\", s, i)}}"
+
+# Sort by array value without losing indices
+gawk "BEGIN{a[\"GR\"]=1;a[\"T2R\"]=3;a[\"ZR3\"]=1;a[\"YY\"]=2;for(i in a)printf(\"%s\t%d\n\",i,a[i]) | \"sort -k2 -n\"}"
+
+# Round in oneline
+gawk "BEGIN{print round(0.567)}function round(x,i,a,f){i=int(x);if(i==x)return x;if(x<0){a=-x;i=int(a);f=a-i;if(f>=.5)return int(x)-1;else return int(x)}else{f=x-i;if(f>=.5)return i+1;else return i}}"
+
+# Count and print names of uniq sequences in Percon output
+gawk "/^seq ID/{f=1;getline}/^invalid/{exit}f&&/^[^ ]/{if($1~/\./){a[substr($1,1,index($1,\".\")-1)]++}else{a[$1]++}}END{for(i in a)print i;print length(a)}" input.prcn > output
+
+# Extract only masked sequences from Repeat Masker FASTA output
+gawk "BEGIN{ORS=\"\"}/^>/{if((s)&&(s~/[acgtn]/)){print h s}h=\"\n\"$1\"\n\";s=\"\"}!/[^AaCcGgTtNn]/{s=s$1}END{if((s)&&(s~/[acgtn]/)){print h s}}" RM.masked.txt > RM.masked.fas
+# Extract only unmasked sequences from Repeat Masker FASTA output
+gawk "BEGIN{ORS=\"\"}/^>/{if((s)&&(s!~/[acgtn]/)){print h s}h=\"\n\"$1\"\n\";s=\"\"}!/[^AaCcGgTtNn]/{s=s$1}END{if((s)&&(s!~/[acgtn]/)){print h s}}" RM.masked.txt > RM.unmasked.fas
+
+# Wrap lines in FASTA files at 60 characters
+$ find . -type f -name "*.fasta" -exec sh -c 'fold -w 60 {} > $(basename {} .fasta).fas' \;
+
+# View some fields in SAM
+gawk '{print $1,$4,$5,$6,$(NF-2),$(NF-1)}' seq_mapped_to_GJ211986-sorted.sam | less -SN
+
+# Sort SAM by MD:Z field
+gawk "{print $(NF-1),$0}" seq_mapped_to_GJ211986.sam | sort -k1Vr | gawk "{sub(/^.+? /,\"\",$0);print}" > o1
+
+# Print FASTA seq from SAM with MD:Z field
+gawk '{print "\76"$1"\174"$(NF-1);print$10}' seq_mapped_to_GJ211986-sorted1.sam > seq_mapped_to_GJ211986.fas
+
+# Sort SAM by NM:i field
+gawk '{print $(NF-2),$0}' seq_mapped_to_GJ211986.sam | sort -k1V | gawk '{sub(/^.+? /,"",$0);print}' > o1
+
