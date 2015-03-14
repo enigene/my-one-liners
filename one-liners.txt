@@ -52,6 +52,9 @@ sed "$!N;s/d/ d/;s/_/_ /;s/\n/ $/" XPA1D.fas | sort -n -k 2 | sed "s/ //g;s/\$/\
 # Sort BED by contig and first coordinate (w/o header)
 sort -k 1.4,1V -k 2,2n input.bed > output.bed
 
+# Sort tab delimited file with header row
+(read -r; printf "%s\n" "$REPLY"; sort -t $'\t' -k1V) < input > output.sorted
+
 # Translate lines UNIX -> DOS (winxp)
 sed.exe -e "s/\r/\n/" input.gb > output.gb
 # Translate lines UNIX -> DOS (win7, linux)
