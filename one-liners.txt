@@ -133,4 +133,4 @@ find -type f -name "*.bam" -exec sh -c '~/samtools/samtools view -h {} -o $(dirn
 find -type f -name "*.sam" -exec sh -c 'gawk "!/^@/{print \"@\"\$1\"\n\"\$10\"\n+\n\"\$11}" {} > $(dirname {})/$(basename {} .sam).fastq' \;
 
 # Calculate GC-content
-gawk '!/[^ACGTN]/{split($0,a,"");for(i in a)b[a[i]]++}END{printf("%.2f%%",(b["G"]+b["C"])/(b["A"]+b["T"]+b["G"]+b["C"])*100)}' input.fasta
+gawk '!/[^ACGTN]/{split($0,a,"");for(i in a)b[a[i]]++}END{printf("%.2f%%\n",(b["G"]+b["C"])/(b["A"]+b["T"]+b["G"]+b["C"])*100)}' input.fasta
