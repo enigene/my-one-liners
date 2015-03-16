@@ -134,3 +134,6 @@ find -type f -name "*.sam" -exec sh -c 'gawk "!/^@/{print \"@\"\$1\"\n\"\$10\"\n
 
 # Calculate GC-content
 gawk '!/[^ACGTN]/{split($0,a,"");for(i in a)b[a[i]]++}END{printf("%.2f%%\n",(b["G"]+b["C"])/(b["A"]+b["T"]+b["G"]+b["C"])*100)}' input.fasta
+
+# Delete txt files except those which name has a "-sort".
+find -maxdepth 1 -type f \( -iname "*.txt" ! -iname "*-sort*.txt" \) -exec rm {} \;
