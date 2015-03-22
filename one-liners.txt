@@ -76,7 +76,7 @@ find -type f -name "*.fas" -exec sh -c "gawk 'NR==1{print}NR>1{ORS=\"\";print}' 
 find -type f -name "*.gb" -printf "c:\\deep720\\perconTask.exe -db %h\\%f -rs 0.20 -fasMon 1\n" > percon.bat
 
 # Extract FASTA sequences from PERCON output
-gawk 'BEGIN{ORS=""}/^seq ID/{f=1;getline}/^invalid/{exit}f&&/^\76/{gsub(/\r/,"");if(n++)printf"\n";print;printf"\n"}!/[^ACGTN\r]/{gsub(/\r/,"");print}END{printf"\n"}' output.prcn > seq.fasta
+gawk 'BEGIN{ORS=""}/^seq ID/{f=1;getline}f&&/^\76/{gsub(/\r/,"");if(n++)printf"\n";print;printf"\n"}!/[^ACGTN\r]/{gsub(/\r/,"");print}END{printf"\n"}' $(ls -v *.prcn | xargs) > seq.fasta
 
 # Count seq in some FASTA files
 find -type f -name "*.fas" -exec sh -c 'gawk "/^>/{n++}END{print FILENAME,n}" {}' \;
