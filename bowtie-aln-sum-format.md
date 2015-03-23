@@ -1,4 +1,4 @@
-# Format Bowtie alignment summmary
+# Format Bowtie alignment summary
 
 ``` awk
 gawk 'BEGIN { ORS = "" } \
