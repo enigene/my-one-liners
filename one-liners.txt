@@ -126,6 +126,9 @@ gawk '{print $(NF-2),$0}' input.sam | sort -k1V | gawk '{sub(/^.+? /,"",$0);prin
 # Print FASTA seq from SAM with MD:Z field
 gawk '{print "\76"$1"\174"$(NF-1);print$10}' input.sam > output.fas
 
+# Convert all SAM files to BAM (sort & index)
+ls *.sam | parallel "samtools view -bS {} | samtools sort - {.}-sorted; samtools index {.}-sorted.bam"
+
 # Convert all BAM files to SAM
 find -type f -name "*.bam" -exec sh -c '~/samtools/samtools view -h {} -o $(dirname {})/$(basename {} .bam).sam' \;
 
