@@ -8,7 +8,7 @@
 #### Extract FASTA seq (one line) based on keyword in title
 `gawk '/^>/{if(($0~/16[89]/)||($0~/17[012]/)){h=$0;print}}!/[^ACGTN]/{if(h){print;h=""}}' input.fas > output.fas`
 #### Extract multiline FASTA seq by title pattern
-`$ gawk '/^>/{p=0}/^>.+[^L]$/{print;p=1}!/[^ACGTN]/&&p{print}' input.fas > output.fas`
+`gawk '/^>/{p=0}/^>.+[^L]$/{print;p=1}!/[^ACGTN]/&&p{print}' input.fas > output.fas`
 #### Multiline FASTA to one line
 `gawk 'BEGIN{ORS=""}/^>/{print"\n";print;print"\n"}!/[^ACGTN-]/{print}' input.fas > output.fas`
 #### Trim after space in FASTA title
@@ -88,14 +88,16 @@
 
 ## TEXT
 #### Octal representation of characters
-`CHAR \174 | (vertical line)`
-`CHAR \76  > (greater then sign)`
+```
+CHAR \174 | (vertical line)
+CHAR \76  > (greater then sign)
+```
 #### Sort tab delimited file with header row
 `(read -r; printf "%s\n" "$REPLY"; sort -t $'\t' -k1V) < input > output.sorted`
 #### Translate lines UNIX -> DOS (winxp)
-`sed.exe -e "s/\r/\n/" input.gb > output.gb`
+`sed -e "s/\r/\n/" input.gb > output.gb`
 #### Translate lines UNIX -> DOS (win7, linux)
-`sed.exe -e "s/$/\r/" input.gb > output.gb`
+`sed -e "s/$/\r/" input.gb > output.gb`
 #### Replace string in all files
 `find -type f -name "*.fas" -exec sed -i'' -e 's/_A_D0B5GACXX//' {} \;`
 #### Combine files based name list (prepare index)
