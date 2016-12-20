@@ -108,3 +108,7 @@ CHAR \76  > (greater then sign)
 `gawk 'BEGIN{a["GR"]=1;a["T2R"]=3;a["ZR3"]=1;a["YY"]=2;for(i in a)printf("%s\t%d\n",i,a[i]) | "sort -k2 -n"}'`
 #### Delete txt files except those which name has a 'sort'.
 `find -maxdepth 1 -type f \( -iname "*.txt" ! -iname "*-sort*.txt" \) -exec rm {} \;`
+
+##FILES
+#### Rename files
+`find . -name "*.fasta-*" | sed -e "p;s/\.fasta//;s/\$/.fas/" | xargs -n2 mv`
