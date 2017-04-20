@@ -6,7 +6,7 @@
 
 ## FASTA/FASTQ
 #### Extract FASTA sequences (one line) based on keyword in title
-`gawk '/^>/{if(($0~/16[89]/)||($0~/17[012]/)){h=$0;print}}!/[^ACGTN]/{if(h){print;h=""}}' input.fas > output.fas`
+`awk '/^>/{if($0~/S1C16H1L\.[19]_/){h=$0;print}}!/[^ACGTN\-\r]/{if(h){print;h=""}}' input.fas > output.fas`
 #### Extract multiline FASTA sequences by title pattern
 `gawk '/^>/{p=0}/^>.+[^L]$/{print;p=1}!/[^ACGTN]/&&p{print}' input.fas > output.fas`
 #### Multiline FASTA to one line
