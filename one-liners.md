@@ -51,6 +51,8 @@
 `find . -type f -name "*.fasta" -exec sh -c 'fold -w 60 {} > $(basename {} .fasta).fas' \;`
 #### Calculate GC-content
 `gawk '!/[^ACGTN]/{split($0,a,"");for(i in a)b[a[i]]++}END{printf("%.2f%%\n",(b["G"]+b["C"])/(b["A"]+b["T"]+b["G"]+b["C"])*100)}' input.fasta`
+#### Add chromosome names to FASTA title
+`awk -v f=chr2acc 'BEGIN{while(getline<f)>0){a[$2]="chr"$1" "}close(f)}/^>/{acc=substr($1,2);print">"a[acc] acc}!/^>/{print}' input.fna > output_acc2chr.fas`
 
 ## PERCON
 #### From PERCON output get AS (summa2) and time
